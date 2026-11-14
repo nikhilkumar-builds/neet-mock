@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teacher panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header class="top">
+  <strong>Teacher panel</strong>
+  <nav>
+    <button data-t="tests">Tests</button>
+    <button data-t="create">Create test</button>
+    <button data-t="bank">Question bank</button>
+  </nav>
+  <button id="logout">Sign out</button>
+</header>
+<main class="wrap">
+
+<section id="tests">
+  <h1>Tests</h1>
+  <div class="panel scroll"><table>
+    <thead><tr><th>Title</th><th>Starts</th><th>Length</th><th>Status</th><th></th></tr></thead>
+    <tbody id="testRows"></tbody>
+  </table><p class="muted" id="noTests" hidden>No tests yet. Create one from “Create test”.</p></div>
+</section>
+
+<section id="create" hidden>
+  <h1>Create test</h1>
+  <div class="panel">
+    <div class="grid2">
+      <div><label for="title">Test name</label><input id="title" placeholder="Mock test 1"></div>
+      <div><label for="startAt">Start time</label><input id="startAt" type="datetime-local"></div>
+      <div><label for="dur">Duration (minutes)</label><input id="dur" type="number" value="45" min="5"></div>
+      <div><label for="cnt">Number of questions</label><input id="cnt" type="number" value="45" min="5" max="180"></div>
+    </div>
+    <h2 style="margin-top:1.4rem">Choose chapters</h2>
+    <p class="muted">Only chapters that already have questions in the bank are listed.</p>
+    <div id="chapters"></div>
+    <p><strong id="avail">0</strong> questions available in the selected chapters.</p>
+    <p class="err" id="createErr" role="alert"></p>
+    <button class="primary" id="makeTest">Generate test</button>
+  </div>
+</section>
+
+<section id="bank" hidden>
+  <h1>Question bank</h1>
+  <div class="panel">
+    <p><strong id="qcount">0</strong> questions stored. Paste a JSON array to add more. See <code>sample-questions.json</code> for the format.</p>
+    <textarea id="json" rows="12" placeholder='[{"subject":"Physics","chapter":"Kinematics","topic":"Equations of motion","text":"…","options":["A","B","C","D"],"correct":1,"explanation":"…"}]'></textarea>
+    <p class="err" id="bankMsg" role="alert"></p>
+    <button class="primary" id="importBtn">Add questions</button>
+  </div>
+</section>
+
+<section id="live" hidden>
+  <div class="row"><button id="backLive">Back to tests</button></div>
+  <h1 id="liveTitle">Live monitor</h1>
+  <div class="panel" id="liveBody"></div>
+</section>
+
+<section id="report" hidden>
+  <div class="row"><button id="backReport">Back to tests</button></div>
+  <div id="reportBody"></div>
+</section>
+
+</main>
+<script src="/js/common.js"></script>
+<script src="/js/admin.js"></script>
+</body>
+</html>

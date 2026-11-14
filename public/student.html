@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mock test</title>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header class="top"><strong id="head">Your tests</strong><span class="timer" id="timer" hidden></span><button id="logout">Sign out</button></header>
+<main class="wrap">
+
+<section id="list">
+  <div id="cards"></div>
+  <p class="muted" id="none" hidden>No tests have been set yet.</p>
+</section>
+
+<section id="exam" hidden>
+  <div class="exam">
+    <div class="panel">
+      <p class="muted" id="qmeta"></p>
+      <p class="qtext" id="qtext"></p>
+      <div id="opts"></div>
+      <div class="row" style="margin-top:1rem">
+        <button id="prev">Previous</button>
+        <button id="next" class="primary">Save and next</button>
+        <button id="clear">Clear answer</button>
+      </div>
+      <p class="muted" id="sync" role="status"></p>
+      <p class="err" id="warn" role="alert"></p>
+    </div>
+    <aside class="panel">
+      <h3>Questions</h3>
+      <div class="palette" id="palette"></div>
+      <p class="legend" id="legend"></p>
+      <button class="danger" id="submit" style="width:100%;margin-top:.8rem">Submit test</button>
+    </aside>
+  </div>
+</section>
+
+<section id="done" hidden>
+  <div class="panel"><h1>Test submitted</h1><p>Your teacher will go through the results with you.</p><button id="home" class="primary">Back to your tests</button></div>
+</section>
+
+</main>
+<script src="/js/common.js"></script>
+<script src="/js/proctor.js"></script>
+<script src="/js/student.js"></script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+[
+  {
+    "subject": "Physics",
+    "chapter": "Kinematics",
+    "topic": "Equations of motion",
+    "text": "A body starts from rest with a uniform acceleration of 2 m/s². The distance covered in the first 5 seconds is:",
+    "options": ["10 m", "25 m", "50 m", "12.5 m"],
+    "correct": 1,
+    "explanation": "s = ut + ½at² = 0 + ½ × 2 × 25 = 25 m"
+  },
+  {
+    "subject": "Chemistry",
+    "chapter": "Some Basic Concepts of Chemistry",
+    "topic": "Mole concept",
+    "text": "The number of moles in 36 g of water (molar mass 18 g/mol) is:",
+    "options": ["1", "2", "3", "0.5"],
+    "correct": 1,
+    "explanation": "n = mass / molar mass = 36 / 18 = 2"
+  },
+  {
+    "subject": "Biology",
+    "chapter": "Cell: The Unit of Life",
+    "topic": "Cell organelles",
+    "text": "Which cell organelle is the main site of aerobic respiration?",
+    "options": ["Ribosome", "Golgi apparatus", "Mitochondria", "Lysosome"],
+    "correct": 2,
+    "explanation": "Mitochondria produce most of the cell's ATP through aerobic respiration."
+  },
+  {
+    "subject": "Biology",
+    "chapter": "Cell: The Unit of Life",
+    "topic": "Cell theory",
+    "text": "Who stated that new cells arise from pre-existing cells?",
+    "options": ["Schleiden", "Schwann", "Rudolf Virchow", "Robert Hooke"],
+    "correct": 2,
+    "explanation": "Rudolf Virchow (1855) proposed Omnis cellula e cellula."
+  }
+]
