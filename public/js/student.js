@@ -1,11 +1,11 @@
 requireRole('student');
 $('#logout').onclick = logout;
 let testId, qs = [], answers = {}, cur = 0, endsAt = 0, offset = 0;
-let tick = null, pinger = null, listTimer = null, pending = {}, finished = false;
+let tick = null, pinger = null, listTimer = null, listPoll = null, pending = {}, finished = false;
 const now = () => Date.now() + offset;
 
 function view(id) {
-  ['list', 'exam', 'done'].forEach(s => $('#' + s).hidden = s !== id);
+  ['list', 'exam', 'done', 'report'].forEach(s => $('#' + s).hidden = s !== id);
   $('#timer').hidden = id !== 'exam';
   $('#head').textContent = id === 'exam' ? '' : 'Your tests';
 }
@@ -23,19 +23,21 @@ function drawList() {
   $('#cards').innerHTML = listData.map(t => {
     const wait = new Date(t.startAt) - now();
     let action;
-    if (t.state === 'submitted') action = '<span class="tag ok">Finished</span>';
+    if (t.state === 'submitted') action = `<button class="primary" data-report="${t.id}">View report</button>`;
     else if (wait > 0) action = `<button disabled>Starts in ${mmss(wait)}</button>`;
     else action = `<button class="primary" data-start="${t.id}">${t.state === 'in progress' ? 'Resume test' : 'Start test'}</button>`;
     return `<div class="panel row" style="justify-content:space-between"><div><h2>${esc(t.title)}</h2>
       <p class="muted" style="margin:0">${fmt(t.startAt)} · ${t.questions} questions · ${t.durationMin} minutes</p></div>${action}</div>`;
   }).join('');
   document.querySelectorAll('[data-start]').forEach(b => b.onclick = () => startTest(b.dataset.start));
+  document.querySelectorAll('[data-report]').forEach(b => b.onclick = () => openReport(b.dataset.report));
 }
 function showList() {
   view('list'); loadList().catch(() => {});
   clearInterval(listTimer);
   listTimer = setInterval(() => { if (!$('#list').hidden) { drawList(); } }, 1000);
-  setInterval(() => { if (!$('#list').hidden) loadList().catch(() => {}); }, 10000);
+  clearInterval(listPoll);
+  listPoll = setInterval(() => { if (!$('#list').hidden) loadList().catch(() => {}); }, 10000);
 }
 $('#home').onclick = showList;
 
@@ -106,5 +108,46 @@ async function submit(auto) {
 }
 $('#submit').onclick = () => submit(false);
 window.addEventListener('beforeunload', e => { if (!finished && !$('#exam').hidden) { e.preventDefault(); e.returnValue = ''; } });
+
+// ---------- Report (after the test is finished) ----------
+async function openReport(id) {
+  view('report');
+  const box = $('#reportBody'); box.innerHTML = '<p>Loading…</p>';
+  try {
+    const r = await api(`/student/tests/${id}/report`);
+    const t = r.totals;
+    const acc = x => x.attempted ? Math.round(x.correct / x.attempted * 100) : null;
+    const tag = x => acc(x) === null ? '<span class="tag warn">skipped</span>'
+      : `<span class="tag ${acc(x) < 50 ? 'bad' : acc(x) >= 75 ? 'ok' : 'warn'}">${acc(x)}%</span>`;
+    const bySubject = {};
+    r.topics.forEach(x => (bySubject[x.subject] ||= []).push(x));
+    const tables = ['Physics', 'Chemistry', 'Biology'].filter(s => bySubject[s]).map(s => `
+      <div class="panel scroll"><h2>${s}</h2><table>
+        <thead><tr><th>Chapter · topic</th><th class="num">Qs</th><th class="num">Right</th><th class="num">Wrong</th><th class="num">Marks</th><th>Accuracy</th></tr></thead>
+        <tbody>${bySubject[s].map(x => `<tr><td>${esc(x.chapter)} · ${esc(x.topic)}</td><td class="num">${x.total}</td><td class="num">${x.correct}</td><td class="num">${x.wrong}</td><td class="num">${x.score}</td><td>${tag(x)}</td></tr>`).join('')}</tbody>
+      </table></div>`).join('');
+    const weak = r.topics.filter(x => acc(x) === null || acc(x) < 50).map(x => `${x.chapter}: ${x.topic}`);
+    box.innerHTML = `
+      <h1>${esc(r.title)}</h1>
+      <p class="muted">Finished ${fmt(r.submittedAt)} · Marking: +4 for a correct answer, −1 for a wrong one</p>
+      <div class="stats">
+        <div class="stat"><b>${t.score}/${t.maxScore}</b>marks</div>
+        <div class="stat"><b>${t.attempted}/${t.total}</b>attempted</div>
+        <div class="stat"><b>${t.correct}</b>correct</div>
+        <div class="stat"><b>${t.wrong}</b>wrong</div>
+      </div>
+      ${weak.length ? `<div class="panel"><h2>Topics to revise</h2><p>${weak.map(esc).join(' · ')}</p></div>` : ''}
+      ${tables}
+      <div class="panel"><h2>Question review</h2>
+        ${r.review.map((q, i) => `<details><summary>Q${i + 1}. ${esc(q.chapter)} · ${esc(q.topic)}
+          <span class="tag ${q.chosen === null ? 'warn' : q.chosen === q.correct ? 'ok' : 'bad'}">${q.chosen === null ? 'skipped' : q.chosen === q.correct ? 'correct' : 'wrong'}</span></summary>
+          <p>${esc(q.text)}</p>
+          ${q.options.map((o, k) => `<div class="review-opt ${k === q.correct ? 'right' : k === q.chosen ? 'wrong' : ''}">${'ABCD'[k]}. ${esc(o)}${k === q.correct ? ' (correct answer)' : k === q.chosen ? ' (your answer)' : ''}</div>`).join('')}
+          ${q.explanation ? `<p class="muted">${esc(q.explanation)}</p>` : ''}</details>`).join('')}
+      </div>`;
+  } catch (e) { box.innerHTML = `<p class="err">${esc(e.message)}</p>`; }
+}
+$('#viewReport').onclick = () => openReport(testId);
+$('#backReport').onclick = showList;
 
 showList();

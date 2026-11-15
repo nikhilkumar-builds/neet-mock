@@ -304,6 +304,21 @@ student.post('/tests/:id/events', wrap(async (req, res) => {
   res.json({ ok: true });
 }));
 
+// The student's own report, available only after the test is finished (submitted or time over).
+student.get('/tests/:id/report', wrap(async (req, res) => {
+  const test = await Test.findById(req.params.id).lean();
+  const a = await Attempt.findOne({ testId: req.params.id });
+  if (!test || !a) return res.status(404).json({ error: 'No attempt found for this test' });
+  if (!a.submittedAt) {
+    if (Date.now() < new Date(a.endsAt).getTime()) return res.status(403).json({ error: 'Submit the test to see your report' });
+    await Attempt.updateOne({ _id: a._id }, { $set: { submittedAt: a.endsAt } });   // lock the answers
+    a.submittedAt = a.endsAt;
+  }
+  const qs = await orderedQuestions(test);
+  const { topics, review, totals } = buildReport(qs, a.answers || {});
+  res.json({ title: test.title, submittedAt: a.submittedAt, topics, review, totals });   // no integrity log for the student
+}));
+
 student.post('/tests/:id/submit', wrap(async (req, res) => {
   const a = await openAttempt(req.params.id);
   if (a) await Attempt.updateOne({ _id: a._id }, { $set: { submittedAt: new Date() } });
